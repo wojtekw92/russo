@@ -1,0 +1,22 @@
+{% extends "base" %}
+
+{% block content %}
+{% if error %}
+    <div class="w3-panel w3-red">
+        <h3>Wrong Username or Password!</h3>
+        <p>{{error}}</p>
+    </div>  
+{% endif %}
+<div class="w3-card w3-margin">
+<h1>Russo SSO</h1>
+ <form class="w3-container" action="/login" method="post">
+
+<label>Login</label>
+<input class="w3-input" type="text" name="login">
+
+<label>Password</label>
+<input class="w3-input" type="password" name="password">
+<input type="submit" class="w3-btn w3-margin w3-border" value="Login">
+</form> 
+</div>
+{% endblock content %} 

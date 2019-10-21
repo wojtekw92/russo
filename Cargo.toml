@@ -1,0 +1,13 @@
+[package]
+name = "russo"
+version = "0.1.0"
+authors = ["wojtekw92 <wwozniak92@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+bcrypt = "0.6.0"
+rocket = "0.4.2"
+
+[dependencies.rocket_contrib]
+version = "0.4.2"
+features = ["tera_templates"]
