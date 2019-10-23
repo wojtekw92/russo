@@ -7,11 +7,15 @@ use rocket::response::{Redirect, Flash};
 use rocket::http::{Cookie, Cookies};
 
 extern crate rocket_contrib;
+extern crate jsonwebtoken as jwt;
 
+use jwt::{encode, decode, Header, Algorithm, Validation};
 
 use rocket_contrib::templates::Template;
 use std::collections::HashMap;
 use rocket::request::{self, Form, FlashMessage, FromRequest, Request};
+
+use serde::{Deserialize, Serialize};
 
 mod password;
 
@@ -27,6 +31,8 @@ mod password;
 // }
 
 
+
+
 #[derive(FromForm)]
 struct Login {
     login: String,
@@ -34,17 +40,21 @@ struct Login {
 }
 
 
-#[derive(Debug)]
-struct User(usize);
+
+#[derive(Serialize, Deserialize)]
+struct User {
+    id: i32,
+    login: String,
+
+}
 
 impl<'a, 'r> FromRequest<'a, 'r> for User {
     type Error = std::convert::Infallible;
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<User, Self::Error> {
         request.cookies()
-            .get_private("user_id")
-            .and_then(|cookie| cookie.value().parse().ok())
-            .map(|id| User(id))
+            .get("user_id")
+            .and_then(|cookie| serde_json::from_str(cookie.value()).ok())
             .or_forward(())
     }
 }
@@ -74,20 +84,22 @@ fn do_login(mut cookies: Cookies<'_>, login: Form<Login>) -> Result<Redirect, Fl
     context.insert("login".to_string(),login.login.clone());
     context.insert("password".to_string(),login.password.clone());
     if password::check_hash(&login.password, &hash_from_db) && login.login == username {
-         cookies.add_private(Cookie::new("user_id", 1.to_string()));
-         Ok(Redirect::to(uri!(status_page)))
-
+        let user_data: User = User {
+            id: 0,
+            login: login.login.clone()
+        };
+        cookies.add(Cookie::new("user_id", serde_json::to_string(&user_data).unwrap()));
+        return Ok(Redirect::to(uri!(status_page)))
     } else {
         return Err(Flash::error(Redirect::to(uri!(login_page)), "Invalid username."));
     }
-
-    //  Ok(Template::render("status", context))
 }
 
 #[get("/status")]
 fn status_page(user: User) -> Template {
-    let mut context = HashMap::new();
-    context.insert("user_id", user.0);
+    let mut context = HashMap::<String, String>::new();
+    context.insert("user_id".to_string(), user.id.to_string());
+    context.insert("login".to_string(), user.login);
     Template::render("status", context)
 }
 

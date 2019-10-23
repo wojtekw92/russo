@@ -2,4 +2,5 @@
 
 {% block content %}
 user id: {{ user_id }}<br>
+username: {{ login }}<br>
 {% endblock content %} 
