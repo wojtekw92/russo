@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 bcrypt = "0.6.0"
 cookie = "0.12"
-rocket = { version = "0.4.2", default-features = false }
+rocket = { version = "0.4.7", default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 
 # serde_json is just for the example, not required in general
